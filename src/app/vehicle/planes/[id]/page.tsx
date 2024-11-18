@@ -10,9 +10,9 @@ const SlugWithIdPage = () => {
 
     return (
         <main>
-            <h1>Slug with ID Page</h1>
+            <h1>Page</h1>
             <p>
-                You with ID: <strong>{id}</strong>
+                Showing ID: <strong>{id}</strong>
             </p>
         </main>
     );
