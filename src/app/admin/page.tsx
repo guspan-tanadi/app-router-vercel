@@ -124,7 +124,7 @@ function AdminDashboard() {
         );
         Swal.fire("Deleted!", "Your event has been deleted.", "success");
       }
-      console.log("Event deleted");
+      // console.log("Event deleted");
     } catch (error) {
       Swal.fire("Error!", "There was an error deleting the event.", "error");
       console.log("Error deleting the event", error);
@@ -148,8 +148,10 @@ function AdminDashboard() {
     if (accessToken) {
       try {
         const decodedToken: TokenPayload = jwtDecode(accessToken);
+        /*
         console.log("user_id: ", decodedToken.id);
         console.log("role: ", decodedToken.role);
+        */
         if (decodedToken.role === "USER") {
           router.push("/?redirected=true")
         } else {

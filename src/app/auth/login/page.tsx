@@ -13,7 +13,7 @@ function Page() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    console.log("Login Attempt:", { email, password });
+    // console.log("Login Attempt:", { email, password });
     setLoading(true); // Start loading
 
     try {
@@ -21,7 +21,7 @@ function Page() {
         email,
         password,
       });
-      console.log("Response:", response);
+      // console.log("Response:", response);
 
       const { access_token: accessToken, user } = response.data.data;
       const role = user.role;
@@ -30,7 +30,7 @@ function Page() {
       Cookies.set("access_token", accessToken, { expires: 1 / 24, path: "/" });
       Cookies.set("user_info", JSON.stringify(user), { expires: 1 / 24, path: "/" });
 
-      console.log("User Role:", role);
+      // console.log("User Role:", role);
       if (role === "USER") {
         await router.push("/?redirected=true")
       } else if (role === "ADMIN") {

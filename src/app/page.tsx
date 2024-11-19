@@ -455,9 +455,10 @@ function Page() {
           id: decodedToken.id,
           role: decodedToken.role,
         });
-
+        /*
         console.log("user_id: ", decodedToken.id);
         console.log("role: ", decodedToken.role);
+        */
         
       } catch (error) {
         console.error("Invalid token or decoding error:", error); // Log any decoding errors

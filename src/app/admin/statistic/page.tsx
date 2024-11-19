@@ -116,8 +116,10 @@ function StatsPage() {
     if (accessToken) {
       try {
         const decodedToken: TokenPayload = jwtDecode(accessToken);
+        /*
         console.log("user_id: ", decodedToken.id);
         console.log("role: ", decodedToken.role);
+        */
         if (decodedToken.role === "USER") {
           router.push("/?redirected=true")
         } else {

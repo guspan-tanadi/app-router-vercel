@@ -39,7 +39,7 @@ const RegisterPage: React.FC = () => {
       // Validate form data using Zod schema imported from userSchema.ts
       const validatedData = registerSchema.parse(formData);
 
-      console.log("Registering:", validatedData);
+      // console.log("Registering:", validatedData);
 
       const dataToSend = {
         ...validatedData,
