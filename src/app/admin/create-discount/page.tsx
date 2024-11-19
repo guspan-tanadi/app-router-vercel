@@ -97,7 +97,7 @@ function Page() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       Swal.fire({
         title: "Success!",
         text: "The discount has been posted successfully.",
@@ -189,7 +189,7 @@ function Page() {
         setTokenPayload(null); // Ensure state is updated if there’s an error
       }
     }
-  }, []);
+  }, [router]);
 
   return (
     <DefaultLayout>

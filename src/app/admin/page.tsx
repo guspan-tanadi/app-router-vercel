@@ -163,7 +163,7 @@ function AdminDashboard() {
         setTokenPayload(null); // Ensure state is updated if there’s an error
       }
     }
-  }, []);
+  }, [router]);
 
 
   return (

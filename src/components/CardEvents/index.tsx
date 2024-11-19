@@ -63,7 +63,7 @@ function index({
       </div>
 
       <div className="p-4">
-        <h3 className="mb-2 text-2xl font-extrabold text-black">
+        <h3 className="h-17 mb-2 text-2xl font-extrabold text-black">
           {event_title}
         </h3>
         <p className="text-lg text-gray-700">{formattedDate}</p>

@@ -184,7 +184,7 @@ function Page() {
         }
       },
     });
-  }, []);
+  }, [date, time]);
 
   return (
     <DefaultLayout>

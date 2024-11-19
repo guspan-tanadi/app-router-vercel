@@ -192,7 +192,7 @@ function Page() {
         setTokenPayload(null); // Ensure state is updated if there’s an error
       }
     }
-  }, []);
+  }, [router]);
 
   return (
     <DefaultLayout>
