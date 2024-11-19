@@ -115,7 +115,7 @@ function Page() {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
+      .then(() => {
         // handle success
         loadingRef.current = false;
         forceUpdate();
