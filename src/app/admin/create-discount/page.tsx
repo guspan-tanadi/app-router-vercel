@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 import { discountSchema } from "@/utils/schema";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type TokenPayload = {
   id: number;
@@ -51,10 +52,12 @@ function Page() {
   const startDatePickerRef = useRef<flatpickr.Instance | null>(null);
   const endDatePickerRef = useRef<flatpickr.Instance | null>(null);
 
+  const loadingRef = useRef(false);
+  const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
+
   async function getAllEvents() {
     try {
       const token = Cookies.get("access_token");
-      console.log()
       const response = await axios.get("/api/admin/events", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -85,23 +88,29 @@ function Page() {
     }
 
     setErrors({});
+    loadingRef.current = true;
+    forceUpdate();
 
     try {
-      const response = await axios.post("api/admin/discounts", discount, {
+      await axios.post("api/admin/discounts", discount, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Discount posted successfully:", response.data);
+      
       Swal.fire({
         title: "Success!",
         text: "The discount has been posted successfully.",
         icon: "success",
         confirmButtonText: "OK",
       }).then(() => {
+        loadingRef.current = false; // Stop loading after success
+        forceUpdate();
         router.push("/admin");
       });
     } catch (error) {
+      loadingRef.current = false; // Stop loading after success
+      forceUpdate();
       Swal.fire("Error!", "There was an error creating the discount.", "error");
       console.error("Error posting discount:", error);
     }
@@ -167,10 +176,8 @@ function Page() {
     if (accessToken) {
       try {
         const decodedToken: TokenPayload = jwtDecode(accessToken);
-        console.log("user_id: ", decodedToken.id);
-        console.log("role: ", decodedToken.role);
         if (decodedToken.role === "USER") {
-          router.push("/?redirected=true")
+          router.push("/?redirected=true");
         } else {
           setTokenPayload({
             id: decodedToken.id,
@@ -184,7 +191,6 @@ function Page() {
     }
   }, []);
 
-
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Create Discount"></Breadcrumb>
@@ -196,127 +202,131 @@ function Page() {
                 Discount Event Form
               </h3>
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="p-6.5">
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-2.5 block text-black dark:text-white">
-                      Events
-                    </label>
-                    <div className="relative z-20 bg-transparent dark:bg-form-input">
-                      <select
-                        value={selectedOption}
-                        onChange={(e) => {
-                          setSelectedOption(Number(e.target.value));
-                          changeTextColor();
-                        }}
-                        className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
-                          isOptionSelected ? "text-black dark:text-white" : ""
-                        }`}
-                      >
-                        <option
-                          value=""
-                          disabled
-                          className="text-body dark:text-bodydark"
+            {loadingRef.current ? (
+              <LoadingSpinner />
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="p-6.5">
+                  <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                    <div className="w-full xl:w-1/2">
+                      <label className="mb-2.5 block text-black dark:text-white">
+                        Events
+                      </label>
+                      <div className="relative z-20 bg-transparent dark:bg-form-input">
+                        <select
+                          value={selectedOption}
+                          onChange={(e) => {
+                            setSelectedOption(Number(e.target.value));
+                            changeTextColor();
+                          }}
+                          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
+                            isOptionSelected ? "text-black dark:text-white" : ""
+                          }`}
                         >
-                          Select the event
-                        </option>
-                        {events
-                          .filter(
-                            (item) =>
-                              item.price > 0 && item.discounted_price <= 0,
-                          )
-                          .map((item) => (
-                            <option
-                              key={item.event_id}
-                              value={item.event_id}
-                              className="text-body dark:text-bodydark"
-                            >
-                              {item.event_title}
-                            </option>
-                          ))}
-                      </select>
-                      {errors.event_id && (
+                          <option
+                            value=""
+                            disabled
+                            className="text-body dark:text-bodydark"
+                          >
+                            Select the event
+                          </option>
+                          {events
+                            .filter(
+                              (item) =>
+                                item.price > 0 && item.discounted_price <= 0,
+                            )
+                            .map((item) => (
+                              <option
+                                key={item.event_id}
+                                value={item.event_id}
+                                className="text-body dark:text-bodydark"
+                              >
+                                {item.event_title}
+                              </option>
+                            ))}
+                        </select>
+                        {errors.event_id && (
+                          <span className="text-sm text-red-500">
+                            {errors.event_id._errors[0]}
+                          </span>
+                        )}
+                        <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
+                          {/* SVG Icon */}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-full xl:w-1/2">
+                      <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Discount Percentage
+                      </label>
+                      <input
+                        onChange={(e) =>
+                          setDiscountPercentage(Number(e.target.value))
+                        }
+                        value={discountPercentage}
+                        type="number"
+                        placeholder="Discount Percentage"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                      {errors.discount_percentage && (
                         <span className="text-sm text-red-500">
-                          {errors.event_id._errors[0]}
+                          {errors.discount_percentage._errors[0]}
                         </span>
                       )}
-                      <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
-                        {/* SVG Icon */}
-                      </span>
                     </div>
-                  </div>
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                      Discount Percentage
-                    </label>
-                    <input
-                      onChange={(e) =>
-                        setDiscountPercentage(Number(e.target.value))
-                      }
-                      value={discountPercentage}
-                      type="number"
-                      placeholder="Discount Percentage"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                    {errors.discount_percentage && (
-                      <span className="text-sm text-red-500">
-                        {errors.discount_percentage._errors[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                      Start Date
-                    </label>
-                    <div>
-                      <div className="relative">
-                        <input
-                          ref={startDateInputRef}
-                          className="start-datepicker w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                          placeholder="YYYY-MM-DD"
-                        />
+                    <div className="w-full xl:w-1/2">
+                      <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Start Date
+                      </label>
+                      <div>
+                        <div className="relative">
+                          <input
+                            ref={startDateInputRef}
+                            className="start-datepicker w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                            placeholder="YYYY-MM-DD"
+                          />
 
-                        <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
-                          {/* Calendar Icon */}
+                          <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
+                            {/* Calendar Icon */}
+                          </div>
                         </div>
                       </div>
+                      {errors.start_date && (
+                        <span className="text-sm text-red-500">
+                          {errors.start_date._errors[0]}
+                        </span>
+                      )}
                     </div>
-                    {errors.start_date && (
-                      <span className="text-sm text-red-500">
-                        {errors.start_date._errors[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                      End Date
-                    </label>
-                    <div>
-                      <div className="relative">
-                        <input
-                          ref={endDateInputRef}
-                          className="end-datepicker w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                          placeholder="YYYY-MM-DD"
-                        />
+                    <div className="w-full xl:w-1/2">
+                      <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                        End Date
+                      </label>
+                      <div>
+                        <div className="relative">
+                          <input
+                            ref={endDateInputRef}
+                            className="end-datepicker w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                            placeholder="YYYY-MM-DD"
+                          />
 
-                        <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
-                          {/* Calendar Icon */}
+                          <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
+                            {/* Calendar Icon */}
+                          </div>
                         </div>
                       </div>
+                      {errors.end_date && (
+                        <span className="text-sm text-red-500">
+                          {errors.end_date._errors[0]}
+                        </span>
+                      )}
                     </div>
-                    {errors.end_date && (
-                      <span className="text-sm text-red-500">
-                        {errors.end_date._errors[0]}
-                      </span>
-                    )}
                   </div>
+                  <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                    Submit
+                  </button>
                 </div>
-                <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
-                  Submit
-                </button>
-              </div>
-            </form>
+              </form>
+            )}
           </div>
         </div>
       </div>
