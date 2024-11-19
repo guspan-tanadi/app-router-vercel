@@ -53,13 +53,10 @@ const Header = (props: {
           </button>
           {/* <!-- Hamburger Toggle BTN --> */}
 
-          <Link className="block flex-shrink-0 lg:hidden" href="/">
-            <Image
-              width={32}
-              height={32}
-              src={"/images/logo/logo-icon.svg"}
-              alt="Logo"
-            />
+          <Link
+              className="block flex-shrink-0 lg:hidden text-xl font-bold text-primary"
+              href="/admin">
+              MyTicket Admin Dashboard
           </Link>
         </div>
 
